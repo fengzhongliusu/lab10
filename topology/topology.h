@@ -7,6 +7,8 @@
 #ifndef TOPOLOGY_H 
 #define TOPOLOGY_H
 #include <netdb.h>
+#define MAX_NAME_LENG 32
+#define MAX_NUM_OF_NODE 10
 
 //这个函数返回指定主机的节点ID.
 //节点ID是节点IP地址最后8位表示的整数.

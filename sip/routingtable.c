@@ -12,7 +12,7 @@
 //它将输入的目的节点ID作为哈希键,并返回针对这个目的节点ID的槽号作为哈希值.
 int makehash(int node)
 {
-  return 0;
+	return node%MAX_ROUTINGTABLE_SLOTS;
 }
 
 //这个函数动态创建路由表.表中的所有条目都被初始化为NULL指针.
@@ -20,14 +20,76 @@ int makehash(int node)
 //该函数返回动态创建的路由表结构.
 routingtable_t* routingtable_create()
 {
-  return 0;
+	int i;
+	int nbr_num;
+	int* nbrid_array;
+	int hash_num;
+	routingtable_t* route_table;
+
+	nbr_num = topology_getNbrNum();
+	nbrid_array = topology_getNbrArray();
+
+	route_table = (routingtable_t*)malloc(sizeof(routingtable_t));
+	if(route_table == NULL){
+		printf("malloc fail\n");
+		exit(1);
+	}
+
+	/*初始为NULL*/
+	for(i=0; i<MAX_ROUTINGTABLE_SLOTS; i++)
+	{
+		route_table->hash[i] = NULL;
+	}
+
+	/*将邻居节点插入路由表*/
+	for(i=0; i<nbr_num; i++)
+	{
+		hash_num = makehash(nbrid_array[i]);
+		if(route_table->hash[hash_num] == NULL)    //not allocate
+		{
+			route_table->hash[hash_num] = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
+			assert(route_table->hash[hash_num]!=NULL);
+			route_table->hash[hash_num]->destNodeID = nbrid_array[i];
+			route_table->hash[hash_num]->nextNodeID = nbrid_array[i];				
+			route_table->hash[hash_num]->next = NULL;
+		}
+		else
+		{	
+			//新建表项插入首部
+			routingtable_entry_t* node = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
+			node->destNodeID = nbrid_array[i];
+			node->nextNodeID = nbrid_array[i];
+			node->next = route_table->hash[hash_num];
+			route_table->hash[hash_num] = node;
+		}
+	}
+
+	return route_table;
 }
 
 //这个函数删除路由表.
 //所有为路由表动态分配的数据结构将被释放.
 void routingtable_destroy(routingtable_t* routingtable)
 {
-  return;
+	int i;
+	routingtable_entry_t* temp;
+	routingtable_entry_t* node_dele;
+
+	for(i = 0; i < MAX_ROUTINGTABLE_SLOTS; i++)
+	{
+		if(routingtable->hash[i] != NULL)		//槽中有表项
+		{
+			temp = routingtable->hash[i];
+			while(temp != NULL){
+				node_dele = temp;
+				temp = temp->next;
+				free(node_dele);
+			}
+			routingtable->hash[i] = NULL;
+		}
+	}
+	routingtable = NULL;
+	return;	
 }
 
 //这个函数使用给定的目的节点ID和下一跳节点ID更新路由表.
@@ -38,19 +100,67 @@ void routingtable_destroy(routingtable_t* routingtable)
 //然后将路由条目附加到该槽的链表中.
 void routingtable_setnextnode(routingtable_t* routingtable, int destNodeID, int nextNodeID)
 {
-  return;
+	int hash_num;
+	
+	hash_num =makehash(destNodeID);
+
+	if(routingtable->hash[hash_num]==NULL){   //no such routing list
+		routingtable->hash[hash_num] = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
+		assert(routingtable->hash[hash_num]!=NULL);
+		routingtable->hash[hash_num]->destNodeID = destNodeID;
+		routingtable->hash[hash_num]->nextNodeID = nextNodeID;
+		routingtable->hash[hash_num]->next = NULL;
+	}
+	else
+	{
+		routingtable_entry_t* node = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
+		node->destNodeID = destNodeID;
+		node->nextNodeID = nextNodeID;
+		node->next = routingtable->hash[hash_num];
+		routingtable->hash[hash_num] = node;
+	}
 }
+
 
 //这个函数在路由表中查找指定的目标节点ID.
 //为找到一个目的节点的路由条目, 你应该首先使用哈希函数makehash()获得槽号,
 //然后遍历该槽中的链表以搜索路由条目.如果发现destNodeID, 就返回针对这个目的节点的下一跳节点ID, 否则返回-1.
 int routingtable_getnextnode(routingtable_t* routingtable, int destNodeID)
 {
-  return 0;
+	int hash_num;
+	routingtable_entry_t* node_ite;
+
+	hash_num = makehash(destNodeID);
+	node_ite = routingtable->hash[hash_num];
+
+	while(node_ite != NULL)
+	{
+		if(node_ite->destNodeID == destNodeID)
+			return node_ite->nextNodeID;
+		node_ite = node_ite->next;
+	}
+	return -1;
 }
+
 
 //这个函数打印路由表的内容
 void routingtable_print(routingtable_t* routingtable)
 {
-  return;
+	int i;
+	routingtable_entry_t* node_ite;
+	printf("\n--------------------Routing Table---------------------\n");
+	for(i=0; i<MAX_ROUTINGTABLE_SLOTS; i++)
+	{
+		if(routingtable->hash[i] != NULL)
+		{
+			node_ite = routingtable->hash[i];
+			while(node_ite != NULL)
+			{
+				printf("dest ID-->%d   next ID-->%d\n",node_ite->destNodeID,node_ite->nextNodeID);
+				node_ite = node_ite->next;			
+			}
+		}
+	}
+	printf("--------------------Routing Table---------------------\n\n");
+
 }

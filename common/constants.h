@@ -75,4 +75,6 @@
 
 //路由更新广播间隔, 以秒为单位
 #define ROUTEUPDATE_INTERVAL 5
+
+#define NODE_NUM 4
 #endif
