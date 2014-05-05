@@ -7,6 +7,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#define LISTENQ 10
 //SIP进程使用这个函数连接到本地SON进程的端口SON_PORT.
 //成功时返回连接描述符, 否则返回-1.
 int connectToSON();
