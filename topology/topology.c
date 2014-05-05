@@ -66,6 +66,11 @@ int topology_getNbrNum()
 	char des[MAX_NAME_LENG];
 	int cost = 0;
 	FILE *file = fopen( "../topology/topology.dat","r" );
+	if(file == NULL)
+	{
+		perror("fail to open file\n");
+		exit(1);
+	}
 
 	char localname[MAX_NAME_LENG];
 	gethostname(localname,MAX_NAME_LENG);
@@ -74,13 +79,13 @@ int topology_getNbrNum()
 		return 0;
 	}
 
-	while(!feof(file))
+	while(1)
 	{
 		memset(src, 0, MAX_NAME_LENG);
 		memset(des, 0, MAX_NAME_LENG);
-		fscanf( file, "%s", src);
-		fscanf( file, "%s", des);
-		fscanf( file, "%d", &cost);
+		fscanf( file, "%s %s %d",src,des, &cost);
+		if(feof(file))
+			break;
 		if (strcmp(src , localname) == 0 || strcmp(des , localname) == 0)
 		{
 			neighbor++;
@@ -105,17 +110,21 @@ int topology_getNodeNum()
 	char des[MAX_NAME_LENG];
 	int cost = 0;
 	FILE *file = fopen( "../topology/topology.dat","r" );
+	if(file == NULL)
+	{
+		perror("fail to open file\n");
+		exit(1);
+	}
 
 	char Node[MAX_NUM_OF_NODE][MAX_NAME_LENG];
 
-	while(!feof(file))
+	while(1)
 	{
 		memset( src, 0, MAX_NAME_LENG);
 		memset( des, 0, MAX_NAME_LENG);
 		fscanf(file, "%s %s %d", src, des, &cost);
 		if(feof(file))
 		  break;
-
 		int i = 0;
 		srcExist = 0;
 		dstExist = 0;
@@ -154,6 +163,11 @@ int* topology_getNodeArray()
 	char des[MAX_NAME_LENG];
 	int cost = 0;
 	FILE *file = fopen( "../topology/topology.dat","r" );
+	if(file == NULL)
+	{
+		perror("fail to open file\n");
+		exit(1);
+	}
 
 	char Node[MAX_NUM_OF_NODE][MAX_NAME_LENG];
 	int* NodeArray = (int *)malloc(4 * MAX_NUM_OF_NODE);
@@ -162,7 +176,7 @@ int* topology_getNodeArray()
 	{
 		NodeArray[i] = 0;
 	}
-	while(!feof(file))
+	while(1)
 	{
 		memset( src, 0, MAX_NAME_LENG);
 		memset( des, 0, MAX_NAME_LENG);
@@ -220,13 +234,19 @@ int* topology_getNbrArray()
 	}
 
 	FILE *file = fopen( "../topology/topology.dat","r" );
-	while(!feof(file))
+	if(file == NULL)
+	{
+		perror("fail to open file\n");
+		exit(1);
+	}
+	while(1)
 	{
 		memset(src, 0, MAX_NAME_LENG);
 		memset(des, 0, MAX_NAME_LENG);
-		fscanf( file, "%s", src);
-		fscanf( file, "%s", des);
-		fscanf( file, "%d", &cost);
+		fscanf( file, "%s %s %d",src,des ,&cost);
+		if(feof(file))
+			break;
+
 		if (strcmp(src , localname) == 0)
 		{
 			for (i = 0; NbrArray[i] != 0 ; ++i)
@@ -269,6 +289,11 @@ unsigned int topology_getCost(int fromNodeID, int toNodeID)
 	printf("调用topology_getCost函数 \n");
   	FILE *file;
   	file = fopen("../topology/topology.dat", "r");
+	if(file == NULL)
+	{
+		perror("fail to open file\n");
+		exit(1);
+	}
 	assert(file != NULL);
 
 	char hostname1[MAX_NAME_LENG], hostname2[MAX_NAME_LENG];
