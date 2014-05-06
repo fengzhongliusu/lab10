@@ -244,13 +244,14 @@ WAIT:
 		sip_pkt.header.type = SIP;
 		memcpy(&(sip_pkt.data),&send_seg,sizeof(sendseg_arg_t));
 
-		if(son_sendpkt(next_id,&sip_pkt,son_conn) == -1)
+		if(son_sendpkt(next_id,&sip_pkt,son_conn) == -1)		//send to son
 			perror("error sending to son from stcp!!\n");
 
 		memset(&buffer,0,MAX_SEG_LEN);
 		memset(&send_seg,0,sizeof(sendseg_arg_t));
 		memset(&sip_pkt,0,sizeof(sip_pkt_t));
 	}	
+
 	printf("local stcp disconnect,waiting for another....\n");
 	goto WAIT;
 }
@@ -260,8 +261,7 @@ WAIT:
 //update the dv_table and routing table
 void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 {
-	int i;
-	int j;
+	int i,j;
 	int dest_id = 0;
 	int update_cost = 0;
 	int temp_cost = 0;

@@ -31,4 +31,6 @@ void* listen_to_neighbor(void* arg);
 //它关闭所有的连接, 释放所有动态分配的内存.
 void son_stop(); 
 
+#define LISTEN_NUM 10
+
 #endif

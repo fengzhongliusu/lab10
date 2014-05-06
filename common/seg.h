@@ -84,4 +84,7 @@ unsigned short checksum(seg_t* segment);
 //这个函数检查段中的校验和, 正确时返回1, 错误时返回-1.
 int checkchecksum(seg_t* segment);
 
+
+unsigned short checksum_of_kernel(unsigned char *buf,int len);  //checksum
+
 #endif

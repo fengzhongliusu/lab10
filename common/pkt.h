@@ -7,6 +7,11 @@
 #define	ROUTE_UPDATE 1
 #define SIP 2	
 
+#define SEGSTART1 0 // -- 起点 
+#define SEGSTART2 1 //-- 接收到'!', 期待'&' 
+#define SEGRECV   2 //-- 接收到'&', 开始接收数据
+#define SEGSTOP1  3 // -- 接收到'!', 期待'#'以结束数据的接收
+
 //SIP报文格式定义
 typedef struct sipheader {
   int src_nodeID;		          //源节点ID
