@@ -27,6 +27,10 @@ client目录和server目录下提供的app_{simple/stress}_{client/server}.c文�
 
 
 question:
-1.pkthandler: 循环推出问题
+1.pkthandler: 循环退出问题
 2.路由更新报文发送问题
-3.
+
+
+TODO:
+change routing getcost
+and update rtouing in sip.c

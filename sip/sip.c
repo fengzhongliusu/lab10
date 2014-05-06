@@ -158,8 +158,8 @@ void* pkthandler(void* arg) {
 
 		else if(sip_recv_pkt.header.type == ROUTE_UPDATE)			//更新路由表
 		{
-			printf("pkthandler--->sip recv error!!\n"); fflush(stdout);
-			memcpy(&(update_pkt),&(sip_recv_pkt.data),sizeof(pkt_routeupdate_t));
+			printf("pkthandler--->update msg recved!!\n"); fflush(stdout);
+			memcpy(&update_pkt, &sip_recv_pkt.data, sizeof(pkt_routeupdate_t));
 			update_table(&(update_pkt),sip_recv_pkt.header.src_nodeID);	  
 		}
 
@@ -185,6 +185,7 @@ void sip_stop()
 	nbrcosttable_destroy(nct);
 	dvtable_destroy(dv);
 	routingtable_destroy(routingtable);
+	exit(1);
 }
 
 
@@ -268,27 +269,38 @@ void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 	int origin_cost = 0;
 	int dv_size = topology_getNbrNum()+1;   //size of dv_table
 	
+	printf("*************pass_id: %d****************\n",pass_id);
 	for(i=0; i<update_pkt->entryNum; i++)
 	{
 		dest_id = update_pkt->entry[i].nodeID;
+
+		if(dest_id == pass_id)     //节点自身到自身
+				dvtable_setcost(dv,pass_id,dest_id,0);    //update dvtabe
+			
 		update_cost = update_pkt->entry[i].cost;
+		printf("dest id: %d cost: %d \n",dest_id,update_cost);
 		for(j=0; j<dv_size; j++)
 		{
 			pthread_mutex_lock(dv_mutex);
 			temp_cost = dvtable_getcost(dv,dv[j].nodeID,pass_id) + update_cost;
 			origin_cost = dvtable_getcost(dv,dv[j].nodeID,dest_id);
+			printf("-->srcID %d to destID %d origin cost %d ,if update,cost:%d\n",dv[j].nodeID,dest_id,origin_cost,temp_cost);
 			pthread_mutex_unlock(dv_mutex);
 
 			if(temp_cost < origin_cost)
 			{
+				printf("-----------------update distance vector table---------------\n");
 				pthread_mutex_lock(dv_mutex);
 				dvtable_setcost(dv,dv[j].nodeID,dest_id,temp_cost);    //update dvtabe
+				dvtable_print(dv);
 				pthread_mutex_unlock(dv_mutex);
 
 				if(j == 0)			// the local node
 				{
+					printf("-----------------update routing table---------------\n");
 					pthread_mutex_lock(routingtable_mutex);
 					routingtable_setnextnode(routingtable,dest_id,pass_id);	 //update routingtable
+					routingtable_print(routingtable);
 					pthread_mutex_unlock(routingtable_mutex);
 				}
 

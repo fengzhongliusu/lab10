@@ -12,7 +12,7 @@
 // 如果发送成功, 返回1, 否则返回-1.
 int son_sendpkt(int nextNodeID, sip_pkt_t* pkt, int son_conn)
 {
-	printf("调用son_sendpk函数\n");
+	printf("func-->son_sendpkt()\n");
 	char start[2] = "!&";
 	char stop[2] = "!#";
 	sendpkt_arg_t sendbuf;
@@ -46,7 +46,7 @@ int son_sendpkt(int nextNodeID, sip_pkt_t* pkt, int son_conn)
 // 如果成功接收报文, 返回1, 否则返回-1.
 int son_recvpkt(sip_pkt_t* pkt, int son_conn)
 {
-  printf("调用son_recvpkt函数\n");
+  printf("func-->son_recvpkt()\n");
 
   int  state ;
   char recvbuf[sizeof(sip_pkt_t)];

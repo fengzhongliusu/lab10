@@ -40,13 +40,13 @@ nbr_entry_t* nt_create()
 	int  cost;
 	FILE *file = fopen("../topology/topology.dat","r" );
 
-	while(!feof(file))
+	while(1)
 	{
 		memset(src , 0 , MAX_NAME_LENG);
 		memset(des , 0 , MAX_NAME_LENG);
-		fscanf(file , "%s" , src);
-		fscanf(file , "%s" , des);
-		fscanf(file , "%d" , &cost);
+		fscanf(file , "%s %s %d" , src,des,&cost);
+		if(feof(file))
+			break;
 		if (topology_getNodeIDfromname(src) == idofmy)
 			{
 				for (j = 0; j < number_of_neighbor; ++j)

@@ -23,12 +23,12 @@
 //如果不能获取节点ID, 返回-1.
 int topology_getNodeIDfromname(char* hostname) 
 {
-	printf("调用topology_getNodeIDfromname函数 \n");
+	//printf("调用topology_getNodeIDfromname函数 \n");
 	printf("hostname is %s\n", hostname);
 	struct hostent *host = gethostbyname(hostname);
 	if (host == NULL)
 	{
-		printf("32\n");
+		printf("name is null\n");
 	}
 	unsigned int ID ;
 	ID = (unsigned int)(host->h_addr_list[0][3]& 0x000000FF);
@@ -40,7 +40,7 @@ int topology_getNodeIDfromname(char* hostname)
 //如果不能获取节点ID, 返回-1.
 int topology_getNodeIDfromip(struct in_addr* addr)
 {
-	printf("调用topology_getNodeIDfromip函数 \n");
+//	printf("调用topology_getNodeIDfromip函数 \n");
   	int address = ntohl( addr->s_addr );
 	return address%256;
 }
@@ -49,7 +49,7 @@ int topology_getNodeIDfromip(struct in_addr* addr)
 //如果不能获取本机的节点ID, 返回-1.
 int topology_getMyNodeID()
 {
-  printf("调用topology_getMyNodeID函数 \n");
+ // printf("调用topology_getMyNodeID函数 \n");
   char hostname[32];
   gethostname(hostname , 32);
   return topology_getNodeIDfromname(hostname);
@@ -59,7 +59,7 @@ int topology_getMyNodeID()
 //返回邻居数.
 int topology_getNbrNum()
 {
-	printf("调用topology_getNbrNum函数 \n");
+//	printf("调用topology_getNbrNum函数 \n");
 	int neighbor = 0;
 	char src[MAX_NAME_LENG];
 	char des[MAX_NAME_LENG];
@@ -73,7 +73,7 @@ int topology_getNbrNum()
 
 	char localname[MAX_NAME_LENG];
 	gethostname(localname,MAX_NAME_LENG);
-	printf("hostname = %s\n", localname);
+	//printf("hostname = %s\n", localname);
 	if( localname == NULL){
 		return 0;
 	}
@@ -91,7 +91,7 @@ int topology_getNbrNum()
 		}
 	}
 	fclose(file);
-	printf("num of neighbor is %d \n", neighbor);
+	//printf("num of neighbor is %d \n", neighbor);
 	return neighbor;
 
 }
@@ -100,7 +100,7 @@ int topology_getNbrNum()
 //返回重叠网络中的总节点数.
 int topology_getNodeNum()
 { 
-	printf("调用topology_getNodeNum函数 \n");
+//	printf("调用topology_getNodeNum函数 \n");
     int Nodenum = 0;
 	int srcExist = 0;
 	int dstExist = 0;
@@ -153,7 +153,7 @@ int topology_getNodeNum()
 //返回一个动态分配的数组, 它包含重叠网络中所有节点的ID. 
 int* topology_getNodeArray()
 {
-	printf("调用topology_getNodeArray函数 \n");
+//	printf("调用topology_getNodeArray函数 \n");
 	int Nodenum = 0;
 	int srcExist = 0;
 	int dstExist = 0;
@@ -219,7 +219,7 @@ int* topology_getNodeArray()
 //返回一个动态分配的数组, 它包含所有邻居的节点ID.  
 int* topology_getNbrArray()
 {
-	printf("调用topology_getNbrArray函数 \n");
+//	printf("调用topology_getNbrArray函数 \n");
 	int cost;
 	char src[MAX_NAME_LENG];
 	char des[MAX_NAME_LENG];
@@ -285,7 +285,7 @@ int* topology_getNbrArray()
 //如果指定两个节点之间没有直接链路, 返回INFINITE_COST.
 unsigned int topology_getCost(int fromNodeID, int toNodeID)
 {
-	printf("调用topology_getCost函数 \n");
+//	printf("调用topology_getCost函数 \n");
   	FILE *file;
   	file = fopen("../topology/topology.dat", "r");
 	if(file == NULL)
@@ -298,7 +298,7 @@ unsigned int topology_getCost(int fromNodeID, int toNodeID)
 	char hostname1[MAX_NAME_LENG], hostname2[MAX_NAME_LENG];
 	int NodeID1, NodeID2;
 	int cost;
-	while(!feof(file))
+	while(1)
 	{
 		memset( hostname1, 0, MAX_NAME_LENG);
 		memset( hostname2, 0, MAX_NAME_LENG);

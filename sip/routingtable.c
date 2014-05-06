@@ -101,8 +101,10 @@ void routingtable_destroy(routingtable_t* routingtable)
 void routingtable_setnextnode(routingtable_t* routingtable, int destNodeID, int nextNodeID)
 {
 	int hash_num;
+	int find_sign = 0;
 	
 	hash_num =makehash(destNodeID);
+	routingtable_entry_t* node_ite;
 
 	if(routingtable->hash[hash_num]==NULL){   //no such routing list
 		routingtable->hash[hash_num] = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
@@ -113,11 +115,27 @@ void routingtable_setnextnode(routingtable_t* routingtable, int destNodeID, int 
 	}
 	else
 	{
-		routingtable_entry_t* node = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
-		node->destNodeID = destNodeID;
-		node->nextNodeID = nextNodeID;
-		node->next = routingtable->hash[hash_num];
-		routingtable->hash[hash_num] = node;
+		node_ite = routingtable->hash[hash_num];
+		while(node_ite != NULL)
+		{
+			if(node_ite->destNodeID == destNodeID)
+			{
+				node_ite->nextNodeID = nextNodeID;
+				find_sign = 1;
+				break;
+			}
+			node_ite = node_ite->next;
+		}
+
+		if(find_sign == 0)    //can't find
+		{
+			routingtable_entry_t* node = (routingtable_entry_t*)malloc(sizeof(routingtable_entry_t));
+			node->destNodeID = destNodeID;
+			node->nextNodeID = nextNodeID;
+			node->next = routingtable->hash[hash_num];
+			routingtable->hash[hash_num] = node;
+		}
+
 	}
 }
 
