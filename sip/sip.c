@@ -273,12 +273,9 @@ void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 	for(i=0; i<update_pkt->entryNum; i++)
 	{
 		dest_id = update_pkt->entry[i].nodeID;
-
-		if(dest_id == pass_id)     //节点自身到自身
-				dvtable_setcost(dv,pass_id,dest_id,0);    //update dvtabe
-			
 		update_cost = update_pkt->entry[i].cost;
 		printf("dest id: %d cost: %d \n",dest_id,update_cost);
+
 		for(j=0; j<dv_size; j++)
 		{
 			pthread_mutex_lock(dv_mutex);

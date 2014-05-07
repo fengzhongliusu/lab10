@@ -56,7 +56,12 @@ dv_t* dvtable_create()
 		{			
 			dvt[i].dvEntry[j].nodeID = nodeid_array[j];
 			if(i != 0)			//the nbr node
-				dvt[i].dvEntry[j].cost = INFINITE_COST;
+			{
+				if(dvt[i].nodeID != dvt[i].dvEntry[j].nodeID)
+					dvt[i].dvEntry[j].cost = INFINITE_COST;				
+				else
+					dvt[i].dvEntry[j].cost = 0;    //to self cost is 0
+			}
 		}
 
 	//初始化节点自身的距离矢量
@@ -96,7 +101,6 @@ int dvtable_setcost(dv_t* dvtable,int fromNodeID,int toNodeID, unsigned int cost
 	int i;
 	int j;
 	int nbr_num;
-	int change_sign = 0;
 
 	nbr_num = topology_getNbrNum();
 	for(i=0; i<nbr_num+1; i++)	
@@ -105,22 +109,20 @@ int dvtable_setcost(dv_t* dvtable,int fromNodeID,int toNodeID, unsigned int cost
 		{
 			for(j=0; j<NODE_NUM; j++)
 				if(dvtable[i].dvEntry[j].nodeID == toNodeID)
+				{
 					dvtable[i].dvEntry[j].cost = cost;
-			change_sign = 1;
+					return 1;
+				}
 		}
 
-		if(dvtable[i].nodeID == toNodeID)
+		/*if(dvtable[i].nodeID == toNodeID)
 		{
 			for(j=0; j<NODE_NUM; j++)
 				if(dvtable[i].dvEntry[j].nodeID == fromNodeID)
 					dvtable[i].dvEntry[j].cost = cost;
 			change_sign = 1;
-		}
+		}*/
 	}
-
-	if(change_sign == 1)
-		return 1;
-	else
 		return -1;
 }
 
@@ -142,12 +144,13 @@ unsigned int dvtable_getcost(dv_t* dvtable, int fromNodeID, int toNodeID)
 					return dvtable[i].dvEntry[j].cost;
 		}
 		
-		if(dvtable[i].nodeID == toNodeID)
+		/*if(dvtable[i].nodeID == toNodeID)
 		{
 			for(j=0; j<NODE_NUM; j++)
 				if(dvtable[i].dvEntry[j].nodeID == fromNodeID)
 					return dvtable[i].dvEntry[j].cost;
 		}
+		*/
 	}
 	return -1;
 }
