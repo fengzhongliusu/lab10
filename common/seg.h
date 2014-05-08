@@ -19,6 +19,7 @@
 #define	DATA 4
 #define	DATAACK 5
 
+
 //段首部定义. 
 
 typedef struct stcp_hdr {
@@ -86,5 +87,8 @@ int checkchecksum(seg_t* segment);
 
 
 unsigned short checksum_of_kernel(unsigned char *buf,int len);  //checksum
+
+//获取当期系统时间,单位ms
+long getCurrentTime();
 
 #endif

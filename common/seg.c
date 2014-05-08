@@ -3,6 +3,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "seg.h"
 
@@ -12,9 +14,11 @@
 int sip_sendseg(int sip_conn, int dest_nodeID, seg_t* segPtr)
 {
 	sendseg_arg_t  send_seg;
-	
+	segPtr->header.checksum = 0;
+	segPtr->header.checksum = checksum(segPtr);
+
 	send_seg.nodeID = dest_nodeID;
-	memcpy(&(send_seg.seg),segPtr,sizeof(seg_t));
+	memcpy(&(send_seg.seg),segPtr,sizeof(seg_t));	
 	if(send(sip_conn,&send_seg,sizeof(sendseg_arg_t),0)<0){
 		perror("send to sip error!!\n");
 		return -1;
@@ -29,10 +33,10 @@ int sip_sendseg(int sip_conn, int dest_nodeID, seg_t* segPtr)
 int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 {
 	int n;
-	char buffer[MAX_SEG_LEN];
+	char buffer[sizeof(sendseg_arg_t)+1];
 	sendseg_arg_t recv_seg;
 
-	if((n=recv(sip_conn,buffer,MAX_SEG_LEN,0))<=0){
+	if((n=recv(sip_conn,buffer,sizeof(sendseg_arg_t)+1,0))<=0){
 		perror("stcp recv seg from sip error!!!\n");
 		return -1;
 	}
@@ -43,14 +47,14 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 	if(seglost(&recv_seg.seg)==1)
 	{
 		perror("seg from sip is lost!!!\n");
-		return -1;
+		return 1;
 	}
 	else
 	{
 		if(checkchecksum(&recv_seg.seg) == -1)
 		{
 			perror("seg recv from sip checksum is wrong!!!\n");
-			return -1;
+			return 1;
 		}		
 	}
 
@@ -59,7 +63,7 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 	*src_nodeID = recv_seg.nodeID;
 //	memcpy(src_nodeID,&recv_seg.nodeID,sizeof(int));
 
-	return 1;
+	return 0;
 }
 
 //SIP进程使用这个函数接收来自STCP进程的包含段及其目的节点ID的sendseg_arg_t结构.
@@ -68,10 +72,10 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 int getsegToSend(int stcp_conn, int* dest_nodeID, seg_t* segPtr)
 {
 	int n;
-	char buffer[MAX_SEG_LEN];
+	char buffer[MAX_PKT_LEN];
 	sendseg_arg_t recv_seg;
 
-	if((n=recv(stcp_conn,buffer,MAX_SEG_LEN,0))<=0)
+	if((n=recv(stcp_conn,buffer,MAX_PKT_LEN,0))<=0)
 	{
 		perror("getsegTosend--->get seg fail!!\n");
 		return -1;
@@ -176,4 +180,12 @@ unsigned short checksum_of_kernel(unsigned char *buf,int len)  //checksum
   
         return ~sum;  
 
+}
+
+
+long getCurrentTime() {
+  struct timeval tv;    
+  gettimeofday(&tv,NULL);
+  unsigned int time_curr = tv.tv_sec * 1000 + tv.tv_usec / 1000 ;
+  return time_curr;
 }

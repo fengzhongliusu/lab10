@@ -32,17 +32,36 @@
 #define WAITTIME 15
 
 //这个函数连接到本地SIP进程的端口SIP_PORT. 如果TCP连接失败, 返回-1. 连接成功, 返回TCP套接字描述符, STCP将使用该描述符发送段.
-int connectToSIP() {
+int connectToSIP() 
+{
+	int sockfd; 
+	struct sockaddr_in dest;
+	memset(&dest, 0, sizeof(dest));
+	dest.sin_family=AF_INET;  /*PF_INET为IPV4，internet协议，在<netinet/in.h>中，地址族*/ 
+	dest.sin_addr.s_addr = inet_addr("127.0.0.1");
+	dest.sin_port = htons(SIP_PORT);   /*端口号,htons()返回一个以主机字节顺序表达的数。*/  
 
-	//你需要编写这里的代码.
-	
+/*AF_INEI套接字协议族，SOCK_STREAM套接字类型，调用socket函数来创建一个能够进行网络通信的套接字。判断是否创建成功*/
+	if((sockfd = socket(AF_INET,SOCK_STREAM,0))<0){   
+		perror("raw socket created error");  
+		return -1;  
+	}  
+	if (connect(sockfd, (const struct sockaddr *) &dest, sizeof(dest)) != 0) {
+		perror("Problem in connnecting to the server");
+		return -1;
+	}
+
+	system("clear");
+	printf("Client connect successful!\n");
+
+	return sockfd;
 }
 
 //这个函数断开到本地SIP进程的TCP连接. 
-void disconnectToSIP(int sip_conn) {
-
-	//你需要编写这里的代码.
-	
+void disconnectToSIP(int sip_conn) 
+{
+	close(sip_conn);
+	printf("server--->close socket!\n");
 }
 
 int main() {

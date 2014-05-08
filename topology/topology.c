@@ -24,7 +24,7 @@
 int topology_getNodeIDfromname(char* hostname) 
 {
 	//printf("调用topology_getNodeIDfromname函数 \n");
-	printf("hostname is %s\n", hostname);
+	//printf("hostname is %s\n", hostname);
 	struct hostent *host = gethostbyname(hostname);
 	if (host == NULL)
 	{
@@ -32,7 +32,7 @@ int topology_getNodeIDfromname(char* hostname)
 	}
 	unsigned int ID ;
 	ID = (unsigned int)(host->h_addr_list[0][3]& 0x000000FF);
-	printf("ID is %d\n", ID);
+	//printf("ID is %d\n", ID);
 	return (int)ID;
 }
 

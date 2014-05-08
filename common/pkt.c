@@ -12,7 +12,7 @@
 // 如果发送成功, 返回1, 否则返回-1.
 int son_sendpkt(int nextNodeID, sip_pkt_t* pkt, int son_conn)
 {
-	printf("func-->son_sendpkt()\n");
+	//printf("func-->son_sendpkt()\n");
 	char start[2] = "!&";
 	char stop[2] = "!#";
 	sendpkt_arg_t sendbuf;
@@ -46,7 +46,7 @@ int son_sendpkt(int nextNodeID, sip_pkt_t* pkt, int son_conn)
 // 如果成功接收报文, 返回1, 否则返回-1.
 int son_recvpkt(sip_pkt_t* pkt, int son_conn)
 {
-  printf("func-->son_recvpkt()\n");
+  //printf("func-->son_recvpkt()\n");
 
   int  state ;
   char recvbuf[sizeof(sip_pkt_t)];
@@ -227,13 +227,13 @@ int forwardpktToSIP(sip_pkt_t* pkt, int sip_conn)
 	char start[2] = "!&";
 	char stop[2] = "!#";
 	sip_pkt_t sendbuf;
-	memcpy(&(sendbuf),pkt,pkt->header.length + 12);
+	memcpy(&(sendbuf),pkt,sizeof(sip_pkt_t));
 	if (send(sip_conn , start , 2, 0 ) < 0 )
 	{
 		printf("发送 !& fail\n");
 		return -1;
 	}
-	if (send(sip_conn , &sendbuf , pkt->header.length + 12 , 0 ) < 0)
+	if (send(sip_conn , &sendbuf , sizeof(sip_pkt_t), 0 ) < 0)
 	{
 		printf("发送 pkt fail\n");
 		return -1;
@@ -252,7 +252,7 @@ int forwardpktToSIP(sip_pkt_t* pkt, int sip_conn)
 // 如果报文发送成功, 返回1, 否则返回-1.
 int sendpkt(sip_pkt_t* pkt, int conn)
 {
-  	printf("调用sendpkt函数\n");
+  	//printf("调用sendpkt函数\n");
 	char start[2] = "!&";
 	char stop[2] = "!#";
 	sip_pkt_t sendbuf;
@@ -286,7 +286,7 @@ int sendpkt(sip_pkt_t* pkt, int conn)
 // 如果成功接收报文, 返回1, 否则返回-1.
 int recvpkt(sip_pkt_t* pkt, int conn)
 {
-  printf("调用recvpkt函数\n");
+  //printf("调用recvpkt函数\n");
   int  state ;
   char recvbuf[sizeof(sip_pkt_t)];
   int index = 0;

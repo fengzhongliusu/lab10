@@ -124,6 +124,7 @@ void* pkthandler(void* arg) {
 	
 		if(son_recvpkt(&sip_recv_pkt,son_conn)==-1){
 			perror("pkthandler--->sip recv error!!\n");
+			break;
 		}	
 
 		if(sip_recv_pkt.header.type == SIP)    //SIP报文
@@ -164,9 +165,9 @@ void* pkthandler(void* arg) {
 		}
 
 		else
-			perror("pkthandler--->error pkt from son");
+			perror("pkthandler--->error pkt from son\n");
 	}
-
+	pthread_exit(NULL);
 }
 
 //这个函数终止SIP进程, 当SIP进程收到信号SIGINT时会调用这个函数. 
@@ -193,6 +194,7 @@ void sip_stop()
 //在连接建立后, 这个函数从STCP进程处持续接收包含段及其目的节点ID的sendseg_arg_t. 
 //接收的段被封装进数据报(一个段在一个数据报中), 然后使用son_sendpkt发送该报文到下一跳. 下一跳节点ID提取自路由表.
 //当本地STCP进程断开连接时, 这个函数等待下一个STCP进程的连接.
+//TODO change 
 void waitSTCP()
 {	
 	int n;
@@ -201,10 +203,8 @@ void waitSTCP()
 	socklen_t clilen;
 	struct sockaddr_in servaddr;
 	struct sockaddr_in cliaddr;
-	char buffer[MAX_SEG_LEN];
 	sendseg_arg_t send_seg;
 	sip_pkt_t sip_pkt;
-	stcp_conn = -1;
 
 	if((listenfd=socket(AF_INET,SOCK_STREAM,0))<0){
 		printf("failed to create listen socket!!\n");
@@ -213,7 +213,7 @@ void waitSTCP()
 
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servaddr.sin_port = htons(SON_PORT);
+	servaddr.sin_port = htons(SIP_PORT);
 
 	const int on = 1;
 	setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&on,sizeof(on));
@@ -228,30 +228,27 @@ WAIT:
 	stcp_conn = accept(listenfd,(struct sockaddr*)&cliaddr,&clilen);
 	printf("client connected!!\n");
 
-	memset(&buffer,0,MAX_SEG_LEN);
 	memset(&send_seg,0,sizeof(sendseg_arg_t));
 	memset(&sip_pkt,0,sizeof(sip_pkt_t));
-	while((n=recv(stcp_conn,buffer,MAX_SEG_LEN,0))>0)
+	
+	while((n = getsegToSend(stcp_conn,&send_seg.nodeID,&send_seg.seg)) != -1)
 	{
-		memcpy(&send_seg,&buffer,sizeof(sendseg_arg_t));
-
 		pthread_mutex_lock(routingtable_mutex);
 		next_id = routingtable_getnextnode(routingtable,send_seg.nodeID);
 		pthread_mutex_unlock(routingtable_mutex);
 
 		sip_pkt.header.src_nodeID = topology_getMyNodeID();
 		sip_pkt.header.dest_nodeID = send_seg.nodeID;
-		sip_pkt.header.length = sizeof(sendseg_arg_t);
+		sip_pkt.header.length = sizeof(seg_t);
 		sip_pkt.header.type = SIP;
-		memcpy(&(sip_pkt.data),&send_seg,sizeof(sendseg_arg_t));
+		memcpy(&sip_pkt.data,&send_seg.seg,sizeof(seg_t));		
 
-		if(son_sendpkt(next_id,&sip_pkt,son_conn) == -1)		//send to son
+		if(son_sendpkt(next_id,&sip_pkt,son_conn) == -1)
 			perror("error sending to son from stcp!!\n");
 
-		memset(&buffer,0,MAX_SEG_LEN);
 		memset(&send_seg,0,sizeof(sendseg_arg_t));
 		memset(&sip_pkt,0,sizeof(sip_pkt_t));
-	}	
+	}
 
 	printf("local stcp disconnect,waiting for another....\n");
 	goto WAIT;
@@ -274,14 +271,14 @@ void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 	{
 		dest_id = update_pkt->entry[i].nodeID;
 		update_cost = update_pkt->entry[i].cost;
-		printf("dest id: %d cost: %d \n",dest_id,update_cost);
+		//printf("dest id: %d cost: %d \n",dest_id,update_cost);
 
 		for(j=0; j<dv_size; j++)
 		{
 			pthread_mutex_lock(dv_mutex);
 			temp_cost = dvtable_getcost(dv,dv[j].nodeID,pass_id) + update_cost;
 			origin_cost = dvtable_getcost(dv,dv[j].nodeID,dest_id);
-			printf("-->srcID %d to destID %d origin cost %d ,if update,cost:%d\n",dv[j].nodeID,dest_id,origin_cost,temp_cost);
+			//printf("-->srcID %d to destID %d origin cost %d ,if update,cost:%d\n",dv[j].nodeID,dest_id,origin_cost,temp_cost);
 			pthread_mutex_unlock(dv_mutex);
 
 			if(temp_cost < origin_cost)
@@ -289,7 +286,7 @@ void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 				printf("-----------------update distance vector table---------------\n");
 				pthread_mutex_lock(dv_mutex);
 				dvtable_setcost(dv,dv[j].nodeID,dest_id,temp_cost);    //update dvtabe
-				dvtable_print(dv);
+				//dvtable_print(dv);
 				pthread_mutex_unlock(dv_mutex);
 
 				if(j == 0)			// the local node
@@ -297,7 +294,7 @@ void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 					printf("-----------------update routing table---------------\n");
 					pthread_mutex_lock(routingtable_mutex);
 					routingtable_setnextnode(routingtable,dest_id,pass_id);	 //update routingtable
-					routingtable_print(routingtable);
+				//	routingtable_print(routingtable);
 					pthread_mutex_unlock(routingtable_mutex);
 				}
 

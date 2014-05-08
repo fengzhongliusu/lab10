@@ -168,7 +168,10 @@ void* listen_to_neighbor(void* arg)
 	assert(nt[index].nodeID != -1);
 	sip_pkt_t *revbuf = (sip_pkt_t *)malloc(sizeof( sip_pkt_t));
 	while(recvpkt(revbuf,nt[index].conn) == 1)
-	forwardpktToSIP(revbuf , sip_conn);
+	{
+		forwardpktToSIP(revbuf , sip_conn);
+	}
+	pthread_exit(NULL);
 }
 
 //这个函数打开TCP端口SON_PORT, 等待来自本地SIP进程的进入连接. 

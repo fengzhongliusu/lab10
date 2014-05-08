@@ -98,4 +98,10 @@ void* seghandler(void* arg);
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //
 
+
+void send_segack(server_tcb_t* server_tcb,int dst_nodeID,int ack_type);
+
+void *countTime(void* arg);
+
+int find_tcb(stcp_hdr_t hdr);
 #endif

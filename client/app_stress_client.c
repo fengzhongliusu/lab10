@@ -38,7 +38,7 @@
 int connectToSIP() {
 
 	//你需要编写这里的代码.
-	
+	return 0;
 }
 
 //这个函数断开到本地SIP进程的TCP连接. 

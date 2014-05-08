@@ -38,7 +38,7 @@
 //接收缓冲区大小
 #define RECEIVE_BUF_SIZE 1000000
 //数据段超时值, 单位为纳秒
-#define DATA_TIMEOUT 500000
+#define DATA_TIMEOUT 500000000
 //GBN窗口大小
 #define GBN_WINDOW 10
 
