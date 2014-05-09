@@ -20,17 +20,17 @@ int son_sendpkt(int nextNodeID, sip_pkt_t* pkt, int son_conn)
 	memcpy(&(sendbuf.pkt),pkt,pkt->header.length + 12);
 	if (send(son_conn , start , 2, 0 ) < 0 )
 	{
-		printf("发送!&fail\n");
+		printf("23->son_sendpkt() 发送!&fail\n");
 		return -1;
 	}
 	if (send(son_conn , &sendbuf , pkt->header.length + 16 , 0 ) < 0)
 	{
-		printf("发送!&pkt fail\n");
+		printf("28->son_sendpkt 发送!&pkt fail\n");
 		return -1;
 	}
 	if (send(son_conn , stop , 2, 0 ) < 0 )
 	{
-		printf("发送!# fail\n");
+		printf("33->son_sendpkt 发送!# fail\n");
 		return -1;
 	}
   return 1;
@@ -138,7 +138,7 @@ int son_recvpkt(sip_pkt_t* pkt, int son_conn)
 
 int getpktToSend(sip_pkt_t* pkt, int* nextNode,int sip_conn)
 {
-   printf("调用getpktToSend函数\n");
+   // printf("调用getpktToSend函数\n");
 
   int  state ;
   char recvbuf[sizeof(sip_pkt_t)];
@@ -187,10 +187,12 @@ int getpktToSend(sip_pkt_t* pkt, int* nextNode,int sip_conn)
   			 break;
   		case SEGSTOP1:
   			if (recvchar == '#')
-  			 {
+  			 {          
   			 	memset((void *)pkt , 0 , sizeof(sip_pkt_t));
   			 	memcpy(pkt, recvbuf + 4 , index-4);
         		memcpy(nextNode , recvbuf , 4);
+            if(pkt->header.type != 1)   //sip pkt
+              printf("pkt.c 191 getpktToSend() get a pkt from sip\n");
   			 	return 1 ;//接收成功
   			 }
   			 else
@@ -223,24 +225,24 @@ int getpktToSend(sip_pkt_t* pkt, int* nextNode,int sip_conn)
 // 如果报文发送成功, 返回1, 否则返回-1.
 int forwardpktToSIP(sip_pkt_t* pkt, int sip_conn)
 {
-  printf("调用forwardpktToSIP函数\n");
+  // printf("调用forwardpktToSIP函数\n");
 	char start[2] = "!&";
 	char stop[2] = "!#";
 	sip_pkt_t sendbuf;
 	memcpy(&(sendbuf),pkt,sizeof(sip_pkt_t));
 	if (send(sip_conn , start , 2, 0 ) < 0 )
 	{
-		printf("发送 !& fail\n");
+		printf("235->forwardpktToSIP 发送 !& fail\n");
 		return -1;
 	}
 	if (send(sip_conn , &sendbuf , sizeof(sip_pkt_t), 0 ) < 0)
 	{
-		printf("发送 pkt fail\n");
+		printf("240->forwardpktToSIP 发送 pkt fail\n");
 		return -1;
 	}
 	if (send(sip_conn , stop , 2, 0 ) < 0 )
 	{
-		printf("发送 !# fail\n");
+		printf("245->forwardpktToSIP发送 !# fail\n");
 		return -1;
 	}
   return 1;
@@ -259,17 +261,17 @@ int sendpkt(sip_pkt_t* pkt, int conn)
 	memcpy(&(sendbuf),pkt,pkt->header.length + 12);
 	if (send(conn , start , 2, 0 ) < 0 )
 	{
-		printf("发送!& fail\n");
+		printf("264->sendpkt 发送!& fail socket %d\n",conn);
 		return -1;
 	}
 	if (send(conn , &sendbuf , pkt->header.length + 12 , 0 ) < 0)
 	{
-		printf("发送pkt fail\n");
+		printf("269->sendpkt 发送pkt fail\n");
 		return -1;
 	}
 	if (send(conn , stop , 2, 0 ) < 0 )
 	{
-		printf("发送!# fail\n");
+		printf("274->sendpkt 发送!# fail\n");
 		return -1;
 	}
   return 1;
@@ -334,11 +336,11 @@ int recvpkt(sip_pkt_t* pkt, int conn)
   			 break;
   		case SEGSTOP1:
   			if (recvchar == '#')
-  			 {
+  			 {          
   			 	memset((void *)pkt , 0 , sizeof(sip_pkt_t));
   			 	memcpy(pkt, recvbuf, index);
-          printf("srcID IS : %d\n" , pkt->header.src_nodeID);
-          printf("TYPE IS  : %d\n", pkt->header.type);
+          // printf("srcID IS : %d\n" , pkt->header.src_nodeID);
+          // printf("TYPE IS  : %d\n", pkt->header.type);
   			 	return 1 ;//接收成功
   			 }
   			 else

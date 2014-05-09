@@ -123,7 +123,7 @@ void* pkthandler(void* arg) {
 		memset(&update_pkt,0,sizeof(pkt_routeupdate_t));
 	
 		if(son_recvpkt(&sip_recv_pkt,son_conn)==-1){
-			perror("pkthandler--->sip recv error!!\n");
+			perror("sip.c 126 pkthandler--->sip recv error!!\n");
 			break;
 		}	
 
@@ -131,18 +131,10 @@ void* pkthandler(void* arg) {
 		{
 
 			if(sip_recv_pkt.header.dest_nodeID == topology_getMyNodeID())   //目的节点
-			{
-				seg_tcp.header.src_port = 0;
-				seg_tcp.header.dest_port = 0;
-				seg_tcp.header.seq_num = 0;
-				seg_tcp.header.ack_num = 0;
-				seg_tcp.header.type = 0;
-				seg_tcp.header.rcv_win = 0;
-				seg_tcp.header.checksum = 0;
-				seg_tcp.header.length = sip_recv_pkt.header.length;
-				memcpy(&(seg_tcp.data),&(sip_recv_pkt.data),seg_tcp.header.length);
-				seg_tcp.header.checksum = checksum(&seg_tcp);
-
+			{								
+				memcpy(&seg_tcp,&(sip_recv_pkt.data),sizeof(seg_t));				
+				printf("sip.c 145: send tcp a seg!!\n");
+				printf("pkthandler 146:-->dest_port is %d src_port is %d\n",seg_tcp.header.dest_port,seg_tcp.header.src_port);
 				forwardsegToSTCP(stcp_conn,sip_recv_pkt.header.src_nodeID,&seg_tcp);  //发送给本地STCP
 			}
 
@@ -159,7 +151,7 @@ void* pkthandler(void* arg) {
 
 		else if(sip_recv_pkt.header.type == ROUTE_UPDATE)			//更新路由表
 		{
-			printf("pkthandler--->update msg recved!!\n"); fflush(stdout);
+			// printf("pkthandler--->update msg recved!!\n"); fflush(stdout);
 			memcpy(&update_pkt, &sip_recv_pkt.data, sizeof(pkt_routeupdate_t));
 			update_table(&(update_pkt),sip_recv_pkt.header.src_nodeID);	  
 		}
@@ -186,6 +178,8 @@ void sip_stop()
 	nbrcosttable_destroy(nct);
 	dvtable_destroy(dv);
 	routingtable_destroy(routingtable);
+
+	printf("*******************************sip_stop\n");
 	exit(1);
 }
 
@@ -231,11 +225,14 @@ WAIT:
 	memset(&send_seg,0,sizeof(sendseg_arg_t));
 	memset(&sip_pkt,0,sizeof(sip_pkt_t));
 	
-	while((n = getsegToSend(stcp_conn,&send_seg.nodeID,&send_seg.seg)) != -1)
+	while((n = getsegToSend(stcp_conn,&send_seg.nodeID,&send_seg.seg)) != -1)		
 	{
+		printf("sip.c 236 get a seg destid is %d\n",send_seg.nodeID);
 		pthread_mutex_lock(routingtable_mutex);
-		next_id = routingtable_getnextnode(routingtable,send_seg.nodeID);
+		next_id = routingtable_getnextnode(routingtable,send_seg.nodeID);		
 		pthread_mutex_unlock(routingtable_mutex);
+		printf("sip.c 239 next id is %d\n",next_id);
+		printf("waittcp():243-->dest_port is %d\n",send_seg.seg.header.dest_port);
 
 		sip_pkt.header.src_nodeID = topology_getMyNodeID();
 		sip_pkt.header.dest_nodeID = send_seg.nodeID;
@@ -266,7 +263,7 @@ void update_table(pkt_routeupdate_t* update_pkt,int pass_id)
 	int origin_cost = 0;
 	int dv_size = topology_getNbrNum()+1;   //size of dv_table
 	
-	printf("*************pass_id: %d****************\n",pass_id);
+	// printf("*************pass_id: %d****************\n",pass_id);
 	for(i=0; i<update_pkt->entryNum; i++)
 	{
 		dest_id = update_pkt->entry[i].nodeID;
@@ -352,7 +349,6 @@ int main(int argc, char *argv[]) {
 	//等待来自STCP进程的连接
 	printf("waiting for connection from STCP process\n");
 	waitSTCP(); 
-
 }
 
 

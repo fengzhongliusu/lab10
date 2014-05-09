@@ -36,7 +36,7 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 	char buffer[sizeof(sendseg_arg_t)+1];
 	sendseg_arg_t recv_seg;
 
-	if((n=recv(sip_conn,buffer,sizeof(sendseg_arg_t)+1,0))<=0){
+	if((n=recv(sip_conn,buffer,sizeof(sendseg_arg_t)+1,0)) ==0 ){
 		perror("stcp recv seg from sip error!!!\n");
 		return -1;
 	}
@@ -49,14 +49,14 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 		perror("seg from sip is lost!!!\n");
 		return 1;
 	}
-	else
-	{
-		if(checkchecksum(&recv_seg.seg) == -1)
-		{
-			perror("seg recv from sip checksum is wrong!!!\n");
-			return 1;
-		}		
-	}
+	// else
+	// {
+	// 	// if(checkchecksum(&recv_seg.seg) == -1)
+	// 	// {
+	// 	// 	perror("seg recv from sip checksum is wrong!!!\n");
+	// 	// 	return 1;
+	// 	// }		
+	// }
 
 	printf("sip_recv----->>get seg form sip!!\n");
 	memcpy(segPtr,&recv_seg.seg,sizeof(seg_t));
@@ -71,6 +71,7 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 //如果成功接收到sendseg_arg_t就返回1, 否则返回-1.
 int getsegToSend(int stcp_conn, int* dest_nodeID, seg_t* segPtr)
 {
+	printf("seg.c 74 getsegTosend()-->get a seg from stcp\n");
 	int n;
 	char buffer[MAX_PKT_LEN];
 	sendseg_arg_t recv_seg;
@@ -80,7 +81,7 @@ int getsegToSend(int stcp_conn, int* dest_nodeID, seg_t* segPtr)
 		perror("getsegTosend--->get seg fail!!\n");
 		return -1;
 	}
-	printf("getsegTosend()---->n %d and %d\n",n,sizeof(sendseg_arg_t));
+	// printf("getsegTosend()---->n %d and %d\n",n,sizeof(sendseg_arg_t));
 	
 	memcpy(&recv_seg,buffer,sizeof(sendseg_arg_t));
 //	memcpy(dest_nodeID,&recv_seg.nodeID,sizeof(int));

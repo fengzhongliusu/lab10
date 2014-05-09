@@ -169,6 +169,8 @@ void* listen_to_neighbor(void* arg)
 	sip_pkt_t *revbuf = (sip_pkt_t *)malloc(sizeof( sip_pkt_t));
 	while(recvpkt(revbuf,nt[index].conn) == 1)
 	{
+		if(revbuf->header.type != 1)  //sip pkt
+			printf("son.c 172--->get a sip pkt from nbr %d to sip\n", nt[index].nodeID);
 		forwardpktToSIP(revbuf , sip_conn);
 	}
 	pthread_exit(NULL);
@@ -219,7 +221,7 @@ void waitSIP(){
    		
    		if ((*nextNode) == BROADCAST_NODEID)
    		{
-   			printf("收到BROADCAST_NODEID进行群发\n");
+   			//printf("收到BROADCAST_NODEID进行群发\n");
    			for (i = 0; i < num; i++)
    			{
 				sendpkt(pkt, nt[i].conn);
@@ -232,6 +234,8 @@ void waitSIP(){
 				if (*nextNode == nt[i].nodeID)
 					break;
 			}
+
+			printf("son.c 235 waitsip()-->> send a sippkt to nbr %d\n",*nextNode);			
 			sendpkt(pkt, nt[i].conn);
    		}
    	}
@@ -248,6 +252,8 @@ void son_stop() {
 	}
 	free(nt);
 	close(sip_conn);
+
+	printf("********************************************son_stop\n");
 	exit(1);
 }
 

@@ -160,12 +160,18 @@ void* seghandler(void* arg)
 	memset(segBuf,0,sizeof(seg_t));
 
 	while((re_value=sip_recvseg(sip_conn,&src_node_id,segBuf)) != -1){			
+		printf("stcpserver 163: stcpserver -->recv a seg!!\n");
+		printf("segbuf src_port %d dest_port is %d type is %d\n",segBuf->header.dest_port,segBuf->header.dest_port,segBuf->header.type);
 		if(re_value == 1){    // segment lost or checksum is wrong
 			continue;
 		}		
 
 		tcb_no = find_tcb(segBuf->header);     //find the server tcb
+		if(tcb_no == -1){
+			continue;
+		}
 		cnn_tcb = tcbtable[tcb_no];
+		cnn_tcb->client_nodeID	= src_node_id;	
 
 		if(tcb_no==-1){
 			printf("In seghandler___tcb error!!\n");

@@ -164,6 +164,7 @@ int stcp_client_send(int sockfd, void* data, unsigned int length)
 		segBuf_t *sendbuf = (segBuf_t *)malloc(sizeof(segBuf_t));
 		sendbuf->seg.header.src_port = tcbtable[sockfd]->client_portNum;
 		sendbuf->seg.header.dest_port = tcbtable[sockfd]->server_portNum;
+		printf("stcp_client 167 -> dest_port is %d\n",tcbtable[sockfd]->server_portNum);
 		sendbuf->seg.header.seq_num = tcbtable[sockfd]->next_seqNum;
 		// tcbtable[sockfd]->next_seqNum++;
 		sendbuf->seg.header.ack_num = 0;
