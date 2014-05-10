@@ -165,7 +165,7 @@ int stcp_client_send(int sockfd, void* data, unsigned int length)
 		segBuf_t *sendbuf = (segBuf_t *)malloc(sizeof(segBuf_t));
 		sendbuf->seg.header.src_port = tcbtable[sockfd]->client_portNum;
 		sendbuf->seg.header.dest_port = tcbtable[sockfd]->server_portNum;
-		printf("stcp_client 167 -> dest_port is %d\n",tcbtable[sockfd]->server_portNum);
+		//printf("stcp_client 167 -> dest_port is %d\n",tcbtable[sockfd]->server_portNum);
 		sendbuf->seg.header.seq_num = tcbtable[sockfd]->next_seqNum;
 		// tcbtable[sockfd]->next_seqNum++;
 		sendbuf->seg.header.ack_num = 0;
@@ -488,7 +488,7 @@ void* sendBuf_timer(void* clienttcb)
 	{
 		if (tcbtable_tem->sendBufHead == NULL)
 		{
-			printf("sendbufhead is null,timer exit...");
+			printf("sendbufhead is null,timer exit...\n");
 			break;
 		}
 
@@ -497,7 +497,7 @@ void* sendBuf_timer(void* clienttcb)
 		if((currenttime - tcbtable_tem->sendBufHead->sentTime)> DATA_TIMEOUT/1000000 )//超时事件触发
 		{
 			/* code */
-			printf("socket%d!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!超时事件触发 ! \n",tcbtable_tem->client_portNum);
+			printf("socket %d!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!time out ! \n",tcbtable_tem->client_portNum);
 			segBuf_t *tem = tcbtable_tem->sendBufHead;
 			while (tem != tcbtable_tem->sendBufunSent){
 				tem->sentTime = getCurrentTime();
