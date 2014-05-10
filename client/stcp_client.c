@@ -159,8 +159,9 @@ int stcp_client_send(int sockfd, void* data, unsigned int length)
 {
 	printf("FUNC->stcp_client_send\n");
 	pthread_mutex_lock(tcbtable[sockfd]->bufMutex);
-	while(length > 0)
+	while(length > 0)	
 	{
+		printf("length > 0,next sending..\n");
 		segBuf_t *sendbuf = (segBuf_t *)malloc(sizeof(segBuf_t));
 		sendbuf->seg.header.src_port = tcbtable[sockfd]->client_portNum;
 		sendbuf->seg.header.dest_port = tcbtable[sockfd]->server_portNum;
@@ -193,6 +194,7 @@ int stcp_client_send(int sockfd, void* data, unsigned int length)
 		/*-----------------------init--------------------------------*/
 		if (tcbtable[sockfd]->sendBufHead == NULL)
 		{
+			printf("sendbufhead is NULL, sendbuf_timer start......\n");
 			int rc;
 			pthread_t start_timer;    	
 
@@ -486,6 +488,7 @@ void* sendBuf_timer(void* clienttcb)
 	{
 		if (tcbtable_tem->sendBufHead == NULL)
 		{
+			printf("sendbufhead is null,timer exit...");
 			break;
 		}
 
