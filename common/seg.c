@@ -36,7 +36,7 @@ int sip_recvseg(int sip_conn, int* src_nodeID, seg_t* segPtr)
 	char buffer[sizeof(sendseg_arg_t)+1];
 	sendseg_arg_t recv_seg;
 
-	if((n=recv(sip_conn,buffer,sizeof(sendseg_arg_t)+1,0)) ==0 ){
+	if((n=recv(sip_conn,buffer,sizeof(sendseg_arg_t)+1,0)) <=0 ){
 		perror("stcp recv seg from sip error!!!\n");
 		return -1;
 	}
